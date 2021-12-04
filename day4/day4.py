@@ -6,14 +6,18 @@ class Table:
         self.cells = [ int(num) for line in lines for num in line.split() ]
         assert len(self.cells) == 25
         self.marks = [ False for _ in range(0, len(self.cells))]
+        self.won = False
 
     def __repr__(self) -> str:
         return f"Table(cells: {self.cells}, marks: {self.marks})"
 
     def mark(self, num):
+        if self.won:
+            return None
         try:
             self.marks[self.cells.index(num)] = True
             if self.check():
+                self.won = True
                 return num * sum(self.unmarked())
             else:
                 return None
@@ -47,9 +51,6 @@ class Table:
     def unmarked(self):
         return [ item for index, item in enumerate(self.cells) if not self.marks[index]]
 
-drawn_numbers: List[int] = None
-tables: List[Table]= None
-
 def parse_input():
     with open("day4/input") as input:
         drawn_numbers = [ int(num) for num in next(input).split(",")]
@@ -59,9 +60,9 @@ def parse_input():
         #print(f"tables: {tables}")
         return drawn_numbers, tables
 
-drawn_numbers, tables = parse_input()
-
 def part1():
+    drawn_numbers, tables = parse_input()
+
     for drawn_number in drawn_numbers:
         for table in tables:
             result = table.mark(drawn_number)
@@ -69,4 +70,18 @@ def part1():
                 print(f"Part1: {result}")
                 return
 
-part1()
+#part1()
+
+def part2():
+    drawn_numbers, tables = parse_input()
+
+    results = []
+    for drawn_number in drawn_numbers:
+        for table in tables:
+            result = table.mark(drawn_number)
+            if result is not None:
+                results += [result]
+
+    print(f"Part2: {results}")
+
+part2()

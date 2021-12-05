@@ -1,4 +1,5 @@
 from collections import Counter
+#import cProfile
 
 def parse_point(pt):
     return tuple( int(coord) for coord in pt.split(","))
@@ -19,10 +20,8 @@ def expand_diagonal_line(line):
     slope = int((x1 - x2) / (y1 - y2))
     assert slope == 1 or slope == -1
     intercept = y1 - slope * x1
-    return [ (x, y)
+    return [ (x, slope * x + intercept)
         for x in range(min(x1, x2), max(x1, x2)+1)
-        for y in range(min(y1, y2), max(y1, y2)+1)
-        if y == slope * x + intercept
     ]
 
 def count_occurrences(lst):
@@ -73,4 +72,5 @@ def part2():
 
     return len(overlapping_pts)
 
+#cProfile.run("part2()")
 print(f"Part2: {part2()}")

@@ -28,9 +28,11 @@ def daily_increment(day):
         daily_increments[day] = calculate_daily_increment(day)
         return daily_increments[day]
 
-pop = len(day0_pop)
-for day in range(80):
-    pop += daily_increment(day)
-    print(f"Day{day+1}: {daily_increment(day)}, population: {pop}")
+def pop_after_day(day):
+    pop = len(day0_pop)
+    for day in range(day):
+        pop += daily_increment(day)
+    return pop
 
-print(f"Part1: {pop}")
+print(f"Part1: {pop_after_day(80)}")
+print(f"Part2: {pop_after_day(256)}")

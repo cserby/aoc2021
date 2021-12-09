@@ -3,6 +3,8 @@ def parse_input():
         return [[ int(digit) for digit in list(line.strip())] for line in input.readlines() ]
 
 def safe_list_get(list, index, default):
+    if index < 0:
+        return default
     try:
         return list[index]
     except IndexError:

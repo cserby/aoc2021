@@ -1,5 +1,6 @@
 from itertools import groupby
 
+
 def parse_input():
     with open("day13/input") as input:
         points, folds = [
@@ -46,3 +47,19 @@ def part1():
     return len(fold_on_instruction(points, folds[0]))
 
 print(f"Part1: {part1()}")
+
+def print_points(points):
+    x_s, y_s = zip(*points)
+    for y in range(max(y_s) + 1):
+        for x in range(max(x_s) + 1):
+            print("#" if (x, y) in points else " ", end="")
+        print()
+
+def part2():
+    points, folds = parse_input()
+    for fold in folds:
+        points = fold_on_instruction(points, fold)
+    return points
+
+print(f"Part2:")
+print_points(part2())

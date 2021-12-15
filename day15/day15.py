@@ -65,3 +65,25 @@ def part1():
 
 #cProfile.run('part1()')
 print(f"Part1: {part1()}")
+
+def increase_cell(cell):
+    return (cell - 1) % 9 + 1
+
+def increase_line(line, by):
+    return [ increase_cell(cell + by) for cell in line ]
+
+def n_times_line(line, n):
+    return [ increase_cell(line[index] + instance) for instance in range(n) for index in range(len(line)) ]
+
+def n_x_n_times(matrix, n):
+    matrix_n = [ n_times_line(line, n) for line in matrix ]
+    matrix_n_x_n = [ increase_line(matrix_n[index], instance) for instance in range(n) for index in range(len(matrix_n)) ]
+    return matrix_n_x_n
+
+def part2():
+    matrix = parse_input()
+    matrix25 = n_x_n_times(matrix, 5)
+    risks, prev = minimal_risks_from_top_left(matrix25)
+    return risks[-1][-1]
+
+print(f"Part2: {part2()}")

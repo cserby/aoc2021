@@ -1,4 +1,6 @@
 from itertools import islice, tee, zip_longest
+from operator import mul
+from functools import reduce
 
 
 def parse_input():
@@ -32,7 +34,7 @@ def parse_operator(iterable, version, type_field):
         sub_packets = [ sub_packet for sub_packet in parse_n(iterable, number_of_subpackets)]
     return {
         "version": int(version, 2),
-        "type_field": type_field,
+        "type_field": int(type_field, 2),
         "sub_packets": sub_packets,
     }
 
@@ -44,6 +46,7 @@ def parse_literal(iterable, version):
             break
     return {
         "version": int(version, 2),
+        "type_field": int("100", 2),
         "value": int(literal, 2)
     }
 
@@ -104,3 +107,26 @@ def part1():
     return sum(version_numbers(parse_one(hex_to_bin_str(parse_input()))))
 
 print(f"Part1: {part1()}")
+
+def evaluate(packet):
+    if packet["type_field"] == 4:
+        return packet["value"]
+    elif packet["type_field"] == 0:
+        return sum(evaluate(packet) for packet in packet["sub_packets"])
+    elif packet["type_field"] == 1:
+        return reduce(mul, (evaluate(packet) for packet in packet["sub_packets"]), 1)
+    elif packet["type_field"] == 2:
+        return min(evaluate(packet) for packet in packet["sub_packets"])
+    elif packet["type_field"] == 3:
+        return max(evaluate(packet) for packet in packet["sub_packets"])
+    elif packet["type_field"] == 5: #gt
+        return 1 if evaluate(packet["sub_packets"][0]) > evaluate(packet["sub_packets"][1]) else 0
+    elif packet["type_field"] == 6: #lt
+        return 1 if evaluate(packet["sub_packets"][0]) < evaluate(packet["sub_packets"][1]) else 0
+    elif packet["type_field"] == 7: #eq
+        return 1 if evaluate(packet["sub_packets"][0]) == evaluate(packet["sub_packets"][1]) else 0
+
+def part2(str = parse_input()):
+    return evaluate(parse_one(hex_to_bin_str(str)))
+
+print(f"Part2: {part2()}")

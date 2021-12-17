@@ -1,6 +1,6 @@
+from functools import reduce
 from itertools import islice, tee, zip_longest
 from operator import mul
-from functools import reduce
 
 
 def parse_input():

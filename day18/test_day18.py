@@ -2,7 +2,7 @@ import pytest
 
 from .day18 import (add_carry_to_the_leftmost, add_carry_to_the_rightmost,
                     add_snailfish_num, explode, magnitude, parse_input,
-                    parse_snailfish_num, split, sum_snailfish_num)
+                    parse_snailfish_num, split, sum_snailfish_num, all_pairs)
 
 
 def test_parse():
@@ -56,3 +56,9 @@ def test_sum():
 )
 def test_magnitude(start, result):
     assert magnitude(parse_snailfish_num(start)) == result
+
+def test_all_pairs():
+    assert set(all_pairs([1, 2, 3])) == { (1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2) }
+
+def test_part2():
+    assert max(magnitude(add_snailfish_num(sn1, sn2)) for sn1, sn2 in all_pairs(parse_input("day18/sample2"))) == 3993

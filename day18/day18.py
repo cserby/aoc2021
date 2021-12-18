@@ -1,12 +1,14 @@
 import math
 
 
-def parse_input(file = "day18/sample"):
+def parse_input(file="day18/sample"):
     with open(file) as input:
-        return [ parse_snailfish_num(line.strip()) for line in input.readlines() ]
+        return [parse_snailfish_num(line.strip()) for line in input.readlines()]
+
 
 def parse_snailfish_num(str: str):
     return eval(str.replace("[", "(").replace("]", ")"))
+
 
 def flatten_snailfish_num(sn):
     try:
@@ -24,8 +26,10 @@ def flatten_snailfish_num(sn):
         # Not a pair, but a single number
         return sn
 
+
 class NothingToSplitException(Exception):
     pass
+
 
 def split(sn):
     try:
@@ -42,8 +46,10 @@ def split(sn):
         else:
             raise NothingToSplitException(sn)
 
+
 class NothingToExplodeException(Exception):
     pass
+
 
 def add_carry_to_the_rightmost(sn, carry):
     if carry == 0:
@@ -55,6 +61,7 @@ def add_carry_to_the_rightmost(sn, carry):
         # Not a pair, but a single number
         return sn + carry
 
+
 def add_carry_to_the_leftmost(sn, carry):
     if carry == 0:
         return sn
@@ -64,6 +71,7 @@ def add_carry_to_the_leftmost(sn, carry):
     except TypeError:
         # Not a pair, but a single number
         return sn + carry
+
 
 def explode(sn):
     def __explode(sn):
@@ -87,6 +95,7 @@ def explode(sn):
     _, result, _ = __explode(sn)
     return result
 
+
 def explode_N(sn):
     (left, right) = sn
     if depth(sn) == 1:
@@ -98,6 +107,7 @@ def explode_N(sn):
         carry_left, result, carry_right = explode_N(right)
         return 0, (add_carry_to_the_rightmost(left, carry_left), result), carry_right
 
+
 def depth(sn):
     try:
         (left, right) = sn
@@ -106,8 +116,10 @@ def depth(sn):
         # Not a pair, but a single number
         return 0
 
+
 def add_snailfish_num(sn1, sn2):
     return flatten_snailfish_num((sn1, sn2))
+
 
 def sum_snailfish_num(sns):
     result = None
@@ -118,19 +130,21 @@ def sum_snailfish_num(sns):
         result = add_snailfish_num(result, sn)
     return result
 
+
 def magnitude(sn):
     if depth(sn) == 0:
         return sn
-    (left, right) = sn
-    if depth(sn) == 1:
-        return 3*left + 2*right
     else:
+        (left, right) = sn
         return 3*magnitude(left) + 2*magnitude(right)
+
 
 def part1():
     return magnitude(sum_snailfish_num(parse_input("day18/input")))
 
+
 print(f"Part1: {part1()}")
+
 
 def all_pairs(lst):
     for p1 in lst:
@@ -138,7 +152,9 @@ def all_pairs(lst):
             if p1 != p2:
                 yield (p1, p2)
 
+
 def part2():
     return max(magnitude(add_snailfish_num(sn1, sn2)) for sn1, sn2 in all_pairs(parse_input("day18/input")))
+
 
 print(f"Part2: {part2()}")

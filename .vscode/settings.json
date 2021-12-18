@@ -4,4 +4,5 @@
     "python.testing.pytestArgs": [
         "--verbose",
     ],
+    "python.formatting.provider": "autopep8",
 }

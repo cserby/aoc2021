@@ -74,10 +74,12 @@ def image_after_step(image, step):
 
 algo, image = parse_input()
 
-display(image)
-print()
-display(image_after_step(image, 1))
-print()
-display(image_after_step(image, 2))
-print(f"Light: {count_light(image_after_step(image, 2))}")
+def part1():
+    return count_light(image_after_step(image, 2))
 
+print(f"Part1: {part1()}")
+
+def part2():
+    return count_light(image_after_step(image, 50))
+
+print(f"Part2: {part2()}")

@@ -79,6 +79,10 @@ def test_intersect(b1, b2, result):
             Brick(0, 0, 0, 0, 0, 0),
             Brick(2, 2, 0, 0, 0, 0),
         ])),
+        (Brick(0, 3, 0, 0, 0, 0), Brick(1, 2, 0, 0, 0, 0), set([
+            Brick(0, 0, 0, 0, 0, 0),
+            Brick(3, 3, 0, 0, 0, 0),
+        ])),
         (Brick(0, 2, 0, 2, 0, 0), Brick(1, 1, 1, 1, 0, 0), set([
             Brick(0, 0, 0, 0, 0, 0),
             Brick(1, 1, 0, 0, 0, 0),
@@ -106,6 +110,7 @@ def test_intersect(b1, b2, result):
         "no-intersect",
         "intersect-self",
         "take-out-middle-1d",
+        "take-out-middle-2-1d",
         "take-out-middle-2d",
         "take-out-middle-3d",
         "superset",
@@ -202,6 +207,20 @@ def cuboids(brick_set):
                 Brick(12, 12, 10, 10, 0, 0),
             ]
         ),
+        (
+            [
+                ("on", Brick(0,10,0,2,0,0)),
+                ("off", Brick(1,9,0,2,0,0)),
+                ("on", Brick(2,8,0,2,0,0)),
+                ("off", Brick(3,7,0,2,0,0)),
+            ],
+            [
+                Brick(0,0,0,2,0,0),
+                Brick(2,2,0,2,0,0),
+                Brick(8,8,0,2,0,0),
+                Brick(10,10,0,2,0,0),
+            ]
+        )
     ],
     ids=[
         "turn-middle-off",
@@ -209,6 +228,7 @@ def cuboids(brick_set):
         "turn-on-on-off",
         "sample3-first-2-lines-2d",
         "sample3-first-3-lines-2d",
+        "turn-on-off-on-off",
     ]
 )
 def test_instructions(instructions, result):
@@ -284,10 +304,9 @@ def test_sum_volume(bs, result):
 
 @pytest.mark.parametrize(
     "line_no",
-    range(1, 14)
+    range(1, 11)
 )
 def test_sample2(line_no):
     instructions = parse_input("day22/sample2")[:line_no]
-    assert sum_volume(
-        reboot_2(instructions)
-    ) == len(reboot(instructions, limit=None))
+    assert sum_volume(reboot_2(instructions)) == \
+        len(reboot(instructions, limit=None))

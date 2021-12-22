@@ -70,7 +70,7 @@ class Brick:
                     inst = Brick(x_l, x_h, y_l, y_h, z_l, z_h)
                     if inst != intersection:
                         yield inst
-                except:
+                except NotABrickException:
                     pass
 
     @property
@@ -124,17 +124,22 @@ def reboot(instructions, limit=50):
 
 
 def part1():
-    return len(reboot(parse_input("day22/sample2")[:3], limit=None))
+    return len(reboot(parse_input("day22/input"), limit=None))
 
+def minus(brick, bricks):
+    remainder = { brick }
+    for brick in bricks:
+        remainder = { nb for b1 in remainder for nb in b1 - brick }
+    return remainder
 
 def reboot_2(instructions):
     bricks = set()
     for instruction in instructions:
         (on_off, brick) = instruction
         if on_off == "on":
-            bricks = bricks | {brick}
+            bricks = bricks | set(minus(brick, bricks))
         else:
-            bricks = set(new_brick for b1 in bricks for new_brick in set(b1 - brick))
+            bricks = set(new_brick for b1 in bricks for new_brick in b1 - brick)
     return bricks
 
 
@@ -151,7 +156,7 @@ def sum_volume(bricks):
 
 def part2():
     return sum_volume(
-        reboot_2(parse_input("day22/sample2"))
+        reboot_2(parse_input("day22/input"))
     )
 
 

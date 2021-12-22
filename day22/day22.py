@@ -24,7 +24,7 @@ class Brick:
             min(self.y_h, other.y_h), \
             min(self.z_h, other.z_h)
 
-        if x_l < x_h and y_l < y_h and z_l < z_h:
+        if x_l <= x_h and y_l <= y_h and z_l <= z_h:
             return type(self)(x_l, x_h, y_l, y_h, z_l, z_h)
 
     def __sub__(self, other):
@@ -35,29 +35,18 @@ class Brick:
         if intersection is None:
             yield self
         else:
-            x, y, z = {self.x_l, self.x_h}, {
-                self.y_l, self.y_h}, {self.z_l, self.z_h}
-            if self.x_l < other.x_l < self.x_h:
-                x.add(other.x_l)
-            if self.y_l < other.y_l < self.y_h:
-                y.add(other.y_l)
-            if self.z_l < other.z_l < self.z_h:
-                z.add(other.z_l)
-            if self.x_l < other.x_h < self.x_h:
-                x.add(other.x_h)
-            if self.y_l < other.y_h < self.y_h:
-                y.add(other.y_h)
-            if self.z_l < other.z_h < self.z_h:
-                z.add(other.z_h)
-            for (x_l, x_h), (y_l, y_h), (z_l, z_h) in product(pairwise(sorted(x)),
-                                                              pairwise(
-                                                                  sorted(y)),
-                                                              pairwise(
-                                                                  sorted(z)),
-                                                              ):
-                instance = type(self)(x_l, x_h, y_l, y_h, z_l, z_h)
-                if instance != intersection:
-                    yield instance
+            if self.x_l <= intersection.x_l - 1:
+                yield Brick(self.x_l, intersection.x_l - 1, self.y_l, self.y_h, self.z_l, self.z_h)
+            if self.x_h >= intersection.x_h + 1:
+                yield Brick(intersection.x_h + 1, self.x_h, self.y_l, self.y_h, self.z_l, self.z_h)
+            if self.y_l <= intersection.y_l - 1:
+                yield Brick(self.x_l, self.x_h, self.y_l, intersection.y_l - 1, self.z_l, self.z_h)
+            if self.y_h >= intersection.y_h + 1:
+                yield Brick(self.x_l, self.x_h, intersection.y_h + 1, self.y_h, self.z_l, self.z_h)
+            if self.z_l <= intersection.z_l - 1:
+                yield Brick(self.x_l, self.x_h, self.y_l, self.y_h, self.z_l, intersection.z_l - 1)
+            if self.z_h >= intersection.z_h + 1:
+                yield Brick(self.x_l, self.x_h, self.y_l, self.y_h, intersection.z_h + 1, self.z_h)
 
     def __add__(self, other):
         assert isinstance(other, Brick)
@@ -73,7 +62,8 @@ class Brick:
             yield self
         else:
             yield from (self - other)
-            yield other
+            yield from (other - self)
+            yield intersection
 
     @property
     def volume(self):
@@ -114,20 +104,19 @@ def parse_coord_range(coord_range):
     return (int(c_l), int(c_h))
 
 
+def reboot(instructions, limit=50):
+    on = set()
+    for instruction in instructions:
+        (on_off, brick) = instruction
+        if on_off == "on":
+            on = on | set(brick.cuboids(limit))
+        else:
+            on = on - set(brick.cuboids(limit))
+    return on
+
+
 def part1():
-    def reboot(instructions, limit=50):
-        on = set()
-        for instruction in instructions:
-            (on_off, brick) = instruction
-            if on_off == "on":
-                on = on | set(brick.cuboids(limit))
-            else:
-                on = on - set(brick.cuboids(limit))
-        return on
-    return len(reboot(parse_input("day22/sample")[:2]))
-
-
-print(f"Part1: {part1()}")
+    return len(reboot(parse_input("day22/sample2")[:3], limit=None))
 
 
 def pairwise(iterable):
@@ -137,32 +126,28 @@ def pairwise(iterable):
     return zip(a, b)
 
 
+def reboot_2(instructions):
+    bricks = set()
+    for instruction in instructions:
+        (on_off, brick) = instruction
+        if on_off == "on":
+            bricks = bricks | {brick}
+        else:
+            bricks = set(
+                new_brick for b1 in bricks for new_brick in b1 - brick)
+    return bricks
+
+
+def sum_volume(bricks):
+    return sum(brick.volume for brick in bricks) - sum(intersection.volume for (b1, b2) in pairwise(bricks) for intersection in [b1 & b2] if intersection is not None)
+
+
 def part2():
-    def reboot(instructions):
-        bricks = set()
-        for instruction in instructions:
-            (on_off, brick) = instruction
-            if on_off == "on":
-                bricks.add(brick)
-            else:
-                bricks = reduce(
-                    [new_brick for b1 in bricks for new_brick in b1 - brick])
-        return reduce(bricks)
-
-    def reduce(bricks):
-        while any(b1 & b2 for (b1, b2) in pairwise(bricks)):
-            bricks = set(new_brick for (b1, b2) in pairwise(bricks)
-                      for new_brick in b1 + b2)
-        return bricks
-
-    def sum_volume(bricks):
-        #return len(set(cuboid for brick in bricks for cuboid in brick.cuboids()))
-        #return bricks
-        return sum(brick.volume for brick in bricks)
-
     return sum_volume(
-        reboot(parse_input("day22/sample")[:2])
+        reboot_2(parse_input("day22/sample2")[:3])
     )
 
 
-print(f"Part2: {part2()}")
+if __name__ == "__main__":
+    print(f"Part1: {part1()}")
+    print(f"Part2: {part2()}")

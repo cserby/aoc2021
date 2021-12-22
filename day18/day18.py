@@ -143,9 +143,6 @@ def part1():
     return magnitude(sum_snailfish_num(parse_input("day18/input")))
 
 
-print(f"Part1: {part1()}")
-
-
 def all_pairs(lst):
     for p1 in lst:
         for p2 in lst:
@@ -157,4 +154,6 @@ def part2():
     return max(magnitude(add_snailfish_num(sn1, sn2)) for sn1, sn2 in all_pairs(parse_input("day18/input")))
 
 
-print(f"Part2: {part2()}")
+if __name__ == "__main__":
+    print(f"Part1: {part1()}")
+    print(f"Part2: {part2()}")

@@ -1,5 +1,9 @@
 from dataclasses import dataclass
-from itertools import product, tee
+from itertools import permutations, product
+
+
+class NotABrickException(Exception):
+    pass
 
 
 @dataclass(frozen=True)
@@ -11,6 +15,14 @@ class Brick:
     y_h: int
     z_l: int
     z_h: int
+
+    def __post_init__(self):
+        if self.x_l > self.x_h:
+            raise NotABrickException("x")
+        if self.y_l > self.y_h:
+            raise NotABrickException("y")
+        if self.z_l > self.z_h:
+            raise NotABrickException("z")
 
     def __and__(self, other):
         assert isinstance(other, Brick)
@@ -35,35 +47,31 @@ class Brick:
         if intersection is None:
             yield self
         else:
-            if self.x_l <= intersection.x_l - 1:
-                yield Brick(self.x_l, intersection.x_l - 1, self.y_l, self.y_h, self.z_l, self.z_h)
-            if self.x_h >= intersection.x_h + 1:
-                yield Brick(intersection.x_h + 1, self.x_h, self.y_l, self.y_h, self.z_l, self.z_h)
-            if self.y_l <= intersection.y_l - 1:
-                yield Brick(self.x_l, self.x_h, self.y_l, intersection.y_l - 1, self.z_l, self.z_h)
-            if self.y_h >= intersection.y_h + 1:
-                yield Brick(self.x_l, self.x_h, intersection.y_h + 1, self.y_h, self.z_l, self.z_h)
-            if self.z_l <= intersection.z_l - 1:
-                yield Brick(self.x_l, self.x_h, self.y_l, self.y_h, self.z_l, intersection.z_l - 1)
-            if self.z_h >= intersection.z_h + 1:
-                yield Brick(self.x_l, self.x_h, self.y_l, self.y_h, intersection.z_h + 1, self.z_h)
-
-    def __add__(self, other):
-        assert isinstance(other, Brick)
-        other: Brick
-
-        intersection = self & other
-        if intersection is None:
-            yield self
-            yield other
-        elif intersection == self:
-            yield other
-        elif intersection == other:
-            yield self
-        else:
-            yield from (self - other)
-            yield from (other - self)
-            yield intersection
+            x_ranges = [
+                (self.x_l, intersection.x_l - 1),
+                (intersection.x_l, intersection.x_h),
+                (intersection.x_h + 1, self.x_h)
+            ]
+            y_ranges = [
+                (self.y_l, intersection.y_l - 1),
+                (intersection.y_l, intersection.y_h),
+                (intersection.y_h + 1, self.y_h)
+            ]
+            z_ranges = [
+                (self.z_l, intersection.z_l - 1),
+                (intersection.z_l, intersection.z_h),
+                (intersection.z_h + 1, self.z_h)
+            ]
+            for (x_range, y_range, z_range) in product(x_ranges, y_ranges, z_ranges):
+                (x_l, x_h) = x_range
+                (y_l, y_h) = y_range
+                (z_l, z_h) = z_range
+                try:
+                    inst = Brick(x_l, x_h, y_l, y_h, z_l, z_h)
+                    if inst != intersection:
+                        yield inst
+                except:
+                    pass
 
     @property
     def volume(self):
@@ -119,13 +127,6 @@ def part1():
     return len(reboot(parse_input("day22/sample2")[:3], limit=None))
 
 
-def pairwise(iterable):
-    "s -> (s0, s1), (s1, s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
-
-
 def reboot_2(instructions):
     bricks = set()
     for instruction in instructions:
@@ -133,21 +134,27 @@ def reboot_2(instructions):
         if on_off == "on":
             bricks = bricks | {brick}
         else:
-            bricks = set(
-                new_brick for b1 in bricks for new_brick in b1 - brick)
+            bricks = set(new_brick for b1 in bricks for new_brick in set(b1 - brick))
     return bricks
 
 
 def sum_volume(bricks):
-    return sum(brick.volume for brick in bricks) - sum(intersection.volume for (b1, b2) in pairwise(bricks) for intersection in [b1 & b2] if intersection is not None)
+    if len(bricks) == 0:
+        return 0
+    else:
+        total = sum(brick.volume for brick in bricks)
+        pairs = set(permutations(bricks, 2))
+        intersections = {i for i in set(
+            b1 & b2 for b1, b2 in pairs) if i is not None}
+        return total - sum_volume(intersections)
 
 
 def part2():
     return sum_volume(
-        reboot_2(parse_input("day22/sample2")[:3])
+        reboot_2(parse_input("day22/sample2"))
     )
 
 
 if __name__ == "__main__":
-    print(f"Part1: {part1()}")
+    #print(f"Part1: {part1()}")
     print(f"Part2: {part2()}")
